@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "475123206368",
+    "project_id": "mahasainik-2c219",
+    "storage_bucket": "mahasainik-2c219.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:475123206368:android:5d06e64f8bcb49ad86a885",
+        "android_client_info": {
+          "package_name": "com.example.mahasainik_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "475123206368-l2iqaihlnhph02f5i1ijve3vc9q1bkb7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5uCT9nf65WnQ5rJqdTxDQ_-zJL4qn-1g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "475123206368-l2iqaihlnhph02f5i1ijve3vc9q1bkb7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
