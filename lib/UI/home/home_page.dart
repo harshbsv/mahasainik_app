@@ -1,9 +1,19 @@
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
+import 'package:mahasainik_app/UI/categories/categories_screen.dart';
+import 'package:mahasainik_app/UI/profile/profile_screen.dart';
+import 'package:mahasainik_app/networking/api_endpoints.dart';
+import 'package:mahasainik_app/networking/trial_models/best_selling_model.dart';
+import 'package:mahasainik_app/networking/trial_models/categories_model.dart';
+import 'package:mahasainik_app/networking/trial_models/product_list_model.dart';
 import 'package:mahasainik_app/utils/color_assets.dart';
 import 'package:mahasainik_app/utils/constants.dart';
 import 'package:mahasainik_app/utils/image_assets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final List<String> imgList = [
   AppImages.banner,
@@ -25,6 +35,98 @@ class _HomePageState extends State<HomePage> {
   bool _isProductsEnabled = true;
   bool _isServicesEnabled = false;
   final CarouselController _controller = CarouselController();
+
+  late String? token;
+  Future<List<Categories>>? _categoriesFuture;
+  Future<BestSellingModel>? _bestSellingModel;
+  Future<ProductsListModel>? _productsList;
+
+  Future<List<Categories>> getCategories() async {
+    try {
+      final tokenPref = await SharedPreferences.getInstance();
+      token = tokenPref.getString('token');
+      print('tokenpref: $token');
+      final response = await http.get(
+        Uri.parse(ApiEndpoints.getCategories),
+        headers: {
+          'Authorization': token!,
+        },
+      );
+      if (response.statusCode == 200) {
+        print(response.body);
+        Iterable l = json.decode(response.body);
+        List<Categories> categories = List<Categories>.from(
+          l.map(
+            (model) => Categories.fromJson(model),
+          ),
+        );
+        return categories;
+      } else {
+        throw 'Error fetching categories';
+      }
+    } catch (e) {
+      throw 'Error loading categories.';
+    }
+  }
+
+  Future<BestSellingModel> getBestSelling() async {
+    try {
+      final tokenPref = await SharedPreferences.getInstance();
+      token = tokenPref.getString('token');
+      print('tokenpref: $token');
+      final response = await http.get(
+        Uri.parse(ApiEndpoints.bestSelling),
+        headers: {
+          'Authorization': token!,
+        },
+      );
+      if (response.statusCode == 200) {
+        print(response.body);
+        final bestSelling =
+            BestSellingModel.fromJson(jsonDecode(response.body));
+        print(bestSelling);
+        return bestSelling;
+      } else {
+        throw 'Error fetching Best Selling';
+      }
+    } catch (e) {
+      throw 'Error loading Best Selling.';
+    }
+  }
+
+  Future<ProductsListModel> getProductsList() async {
+    try {
+      final tokenPref = await SharedPreferences.getInstance();
+      token = tokenPref.getString('token');
+      print('tokenpref: $token');
+      final response = await http.get(
+        Uri.parse(ApiEndpoints.getProducts),
+        headers: {
+          'Authorization': token!,
+        },
+      );
+      if (response.statusCode == 200) {
+        print(response.body);
+        final productsList =
+            ProductsListModel.fromJson(jsonDecode(response.body));
+        print(productsList);
+        return productsList;
+      } else {
+        throw 'Error fetching Best Selling';
+      }
+    } catch (e) {
+      throw 'Error loading Best Selling.';
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _categoriesFuture = getCategories();
+    _bestSellingModel = getBestSelling();
+    _productsList = getProductsList();
+  }
 
   final List<Widget> imageSliders = imgList
       .map(
@@ -98,7 +200,13 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const Spacer(),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const ProfileScreen(),
+                              ),
+                            );
+                          },
                           child: SvgPicture.asset(
                             AppImages.profileIcon,
                             height: 40,
@@ -218,7 +326,13 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const Spacer(),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const CategoriesScreen(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             'VIEW ALL',
                             style: TextStyle(
@@ -239,6 +353,7 @@ class _HomePageState extends State<HomePage> {
                             setState(() {
                               if (_isProductsEnabled) {
                                 _isProductsEnabled = false;
+                                _isServicesEnabled = true;
                               } else {
                                 _isProductsEnabled = true;
                                 _isServicesEnabled = false;
@@ -274,6 +389,7 @@ class _HomePageState extends State<HomePage> {
                             setState(() {
                               if (_isServicesEnabled) {
                                 _isServicesEnabled = false;
+                                _isProductsEnabled = true;
                               } else {
                                 _isServicesEnabled = true;
                                 _isProductsEnabled = false;
@@ -306,242 +422,62 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    GridView(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 0.45,
-                      ),
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        SizedBox(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreenHue,
-                                  borderRadius: BorderRadius.circular(14),
+                    FutureBuilder<List<Categories>>(
+                      future: _categoriesFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 10,
+                              childAspectRatio: 0.45,
+                            ),
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (context, index) {
+                              return SizedBox(
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.lightGreenHue,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 30.0),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          child: Image.network(
+                                            snapshot.data![index].image,
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      snapshot.data![index].name,
+                                      style: const TextStyle(
+                                        color: AppColors.blackColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 30.0),
-                                  child: Image.asset(
-                                    AppImages.confectionerySnacks,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Confectionary/Snacks',
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreenHue,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 30.0),
-                                  child: Image.asset(
-                                    AppImages.beverages,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Beverages',
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreenHue,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 30.0),
-                                  child: Image.asset(
-                                    AppImages.dairy,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Dairy',
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreenHue,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 30.0),
-                                  child: Image.asset(
-                                    AppImages.fruitsVegetables,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Fruits & Vegetables',
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreenHue,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 30.0),
-                                  child: Image.asset(
-                                    AppImages.personalCare,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Personal Care',
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreenHue,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 30.0),
-                                  child: Image.asset(
-                                    AppImages.homeCare,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Home Care',
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreenHue,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 30.0),
-                                  child: Image.asset(
-                                    AppImages.health,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Health',
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreenHue,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 30.0),
-                                  child: Image.asset(
-                                    AppImages.babyCare,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Baby Care',
-                                style: TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                              );
+                            },
+                          );
+                        }
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
                     ),
                     Image.asset(AppImages.offerBanner1),
                   ],
@@ -572,227 +508,110 @@ class _HomePageState extends State<HomePage> {
                 child: SizedBox(
                   height: 300,
                   width: width,
-                  child: ListView(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: Stack(
-                          children: [
-                            Column(
-                              children: [
-                                Container(
-                                  height: 200,
-                                  width: 200,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: AppColors.greyColor,
+                  child: FutureBuilder<BestSellingModel>(
+                    future: _bestSellingModel,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: snapshot.data!.count,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 15),
+                              child: Stack(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Container(
+                                        height: 200,
+                                        width: 200,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: AppColors.greyColor,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                        ),
+                                        child: Image.network(
+                                          snapshot.data!.results[index].image,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 30),
+                                      Text(
+                                        snapshot.data!.results[index].title,
+                                        style: const TextStyle(
+                                          color: AppColors.blackColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      // Row(
+                                      //   children: [
+                                      //     Text(
+                                      //       '₹${snapshot.data!.results[index].price.exclTax}',
+                                      //       style: const TextStyle(
+                                      //         color: AppColors.greyColor,
+                                      //         fontWeight: FontWeight.w500,
+                                      //         fontSize: 16,
+                                      //         decoration:
+                                      //             TextDecoration.lineThrough,
+                                      //       ),
+                                      //       textAlign: TextAlign.center,
+                                      //     ),
+                                      //     const SizedBox(width: 8),
+                                      //     Text(
+                                      //       '₹${snapshot.data!.results[index].price.inclTax}',
+                                      //       style: const TextStyle(
+                                      //         color: AppColors.greyColor,
+                                      //         fontWeight: FontWeight.w500,
+                                      //         fontSize: 16,
+                                      //       ),
+                                      //       textAlign: TextAlign.center,
+                                      //     ),
+                                      //   ],
+                                      // ),
+                                      Text(
+                                        '₹${snapshot.data!.results[index].price.inclTax}',
+                                        style: const TextStyle(
+                                          color: AppColors.greyColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                  Positioned(
+                                    top: 175,
+                                    right: 74,
+                                    child: Container(
+                                      height: 50,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primaryColor,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.add,
+                                          color: AppColors.whiteColor,
+                                        ),
+                                      ),
                                     ),
-                                    borderRadius: BorderRadius.circular(18),
                                   ),
-                                  child: Image.asset(
-                                    AppImages.bestSellingProduct1,
-                                  ),
-                                ),
-                                const SizedBox(height: 30),
-                                const Text(
-                                  'Brand Charger\nand Cable',
-                                  style: TextStyle(
-                                    color: AppColors.blackColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  '₹799',
-                                  style: TextStyle(
-                                    color: AppColors.greyColor,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                            Positioned(
-                              top: 175,
-                              right: 74,
-                              child: Container(
-                                height: 50,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryColor,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.add,
-                                    color: AppColors.whiteColor,
-                                  ),
-                                ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: Stack(
-                          children: [
-                            Column(
-                              children: [
-                                Container(
-                                  height: 200,
-                                  width: 200,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: AppColors.greyColor,
-                                    ),
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                  child: Image.asset(
-                                    AppImages.bestSellingProduct2,
-                                  ),
-                                ),
-                                const SizedBox(height: 30),
-                                const Text(
-                                  'Britannia Bread',
-                                  style: TextStyle(
-                                    color: AppColors.blackColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: const [
-                                    Text(
-                                      '₹85',
-                                      style: TextStyle(
-                                        color: AppColors.greyColor,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      '₹65',
-                                      style: TextStyle(
-                                        color: AppColors.greyColor,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Positioned(
-                              top: 175,
-                              right: 74,
-                              child: Container(
-                                height: 50,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryColor,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.add,
-                                    color: AppColors.whiteColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 15),
-                        child: Stack(
-                          children: [
-                            Column(
-                              children: [
-                                Container(
-                                  height: 200,
-                                  width: 200,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: AppColors.greyColor,
-                                    ),
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                  child: Image.asset(
-                                    AppImages.bestSellingProduct3,
-                                  ),
-                                ),
-                                const SizedBox(height: 30),
-                                const Text(
-                                  'Surf Excel\nEasy Wash',
-                                  style: TextStyle(
-                                    color: AppColors.blackColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: const [
-                                    Text(
-                                      '1200',
-                                      style: TextStyle(
-                                        color: AppColors.greyColor,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      '₹799',
-                                      style: TextStyle(
-                                        color: AppColors.greyColor,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Positioned(
-                              top: 175,
-                              right: 74,
-                              child: Container(
-                                height: 50,
-                                width: 50,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryColor,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.add,
-                                    color: AppColors.whiteColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                            );
+                          },
+                        );
+                      }
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
                   ),
                 ),
               ),
