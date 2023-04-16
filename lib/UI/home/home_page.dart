@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:mahasainik_app/UI/categories/categories_screen.dart';
+import 'package:mahasainik_app/UI/categories/sub_categories/sub_categories_screen.dart';
 import 'package:mahasainik_app/UI/profile/profile_screen.dart';
 import 'package:mahasainik_app/networking/api_endpoints.dart';
 import 'package:mahasainik_app/networking/trial_models/best_selling_model.dart';
@@ -48,9 +49,9 @@ class _HomePageState extends State<HomePage> {
       print('tokenpref: $token');
       final response = await http.get(
         Uri.parse(ApiEndpoints.getCategories),
-        headers: {
-          'Authorization': token!,
-        },
+        // headers: {
+        //   'Authorization': token!,
+        // },
       );
       if (response.statusCode == 200) {
         print(response.body);
@@ -76,9 +77,9 @@ class _HomePageState extends State<HomePage> {
       print('tokenpref: $token');
       final response = await http.get(
         Uri.parse(ApiEndpoints.bestSelling),
-        headers: {
-          'Authorization': token!,
-        },
+        // headers: {
+        //   'Authorization': token!,
+        // },
       );
       if (response.statusCode == 200) {
         print(response.body);
@@ -438,37 +439,50 @@ class _HomePageState extends State<HomePage> {
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: snapshot.data!.length,
                             itemBuilder: (context, index) {
-                              return SizedBox(
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      height: 120,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.lightGreenHue,
-                                        borderRadius: BorderRadius.circular(14),
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => SubCategoriesScreen(
+                                        categoryTitle:
+                                            snapshot.data![index].name,
                                       ),
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 30.0),
-                                        child: ClipRRect(
+                                    ),
+                                  );
+                                },
+                                child: SizedBox(
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        height: 120,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.lightGreenHue,
                                           borderRadius:
                                               BorderRadius.circular(14),
-                                          child: Image.network(
-                                            snapshot.data![index].image,
-                                            fit: BoxFit.fill,
+                                        ),
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 30.0),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            child: Image.network(
+                                              snapshot.data![index].image,
+                                              fit: BoxFit.fill,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      snapshot.data![index].name,
-                                      style: const TextStyle(
-                                        color: AppColors.blackColor,
-                                        fontWeight: FontWeight.w600,
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        snapshot.data![index].name,
+                                        style: const TextStyle(
+                                          color: AppColors.blackColor,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               );
                             },

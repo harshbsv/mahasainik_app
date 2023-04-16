@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mahasainik_app/UI/profile/add_address.dart';
+import 'package:mahasainik_app/UI/profile/subwidgets/address_display_widget.dart';
+import 'package:mahasainik_app/UI/profile/update_profile_screen.dart';
 import 'package:mahasainik_app/networking/api_endpoints.dart';
 import 'package:mahasainik_app/networking/trial_models/get_profile_model.dart';
-import 'package:mahasainik_app/networking/trial_models/update_profile_model.dart';
 import 'package:mahasainik_app/utils/color_assets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,11 +18,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final GlobalKey<FormState> _updateUserFormKey = GlobalKey<FormState>();
-  int addressFieldCount = 1;
   late String? token;
   Future<GetUserProfile>? _getUserProfileFuture;
-  Future<UpdateUserProfile>? _updateUserProfile;
 
   Future<GetUserProfile> getUserProfile() async {
     try {
@@ -29,11 +28,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print('tokenpref: $token');
       final response =
           await http.get(Uri.parse(ApiEndpoints.getProfile), headers: {
-        'token': 'Token $token',
+        'Authorization': 'Token $token',
       });
+      print('response : ${response.body.toString()}');
       if (response.statusCode == 200) {
         final userProfile = GetUserProfile.fromJson(jsonDecode(response.body));
-        print('Get User Profile: $userProfile');
+        print('userprofile email: ${userProfile.email}');
+        tokenPref.setString('user_email', userProfile.email);
+        tokenPref.setString('first_name', userProfile.firstName);
+        tokenPref.setString('last_name', userProfile.lastName);
+        tokenPref.setString('line1', userProfile.address[0].line1);
+        tokenPref.setString('line2', userProfile.address[0].line2);
+        tokenPref.setString('line3', userProfile.address[0].line3);
+        tokenPref.setString('line4', userProfile.address[0].line4);
+        tokenPref.setString('notes', userProfile.address[0].notes);
+        tokenPref.setString('phone_number', userProfile.address[0].phoneNumber);
+        tokenPref.setString('postcode', userProfile.address[0].postcode);
+        tokenPref.setString('state', userProfile.address[0].state);
+        tokenPref.setString('title', userProfile.address[0].title);
         return userProfile;
       } else {
         throw 'status code other than 200';
@@ -55,18 +67,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> _createNewAddressfield = List.generate(
-      addressFieldCount,
-      (int i) => const Padding(
-        padding: EdgeInsets.only(bottom: 20),
-        child: TextField(
-          maxLines: 5,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-          ),
-        ),
-      ),
-    );
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -78,112 +81,249 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Form(
-                key: _updateUserFormKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'My Account',
-                      style: TextStyle(
-                        color: AppColors.blackColor,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    const Text(
-                      'Name:',
-                      style: TextStyle(
-                        color: AppColors.blackColor,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      maxLines: 1,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Email:',
-                      style: TextStyle(
-                        color: AppColors.blackColor,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      maxLines: 1,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Mobile:',
-                      style: TextStyle(
-                        color: AppColors.blackColor,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      maxLines: 1,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
-              OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                ),
-                child: const Text(
-                  'Update Profile',
-                  style: TextStyle(
-                    color: AppColors.whiteColor,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              const Divider(
-                color: AppColors.greyColor,
-              ),
-              const SizedBox(height: 30),
               const Text(
-                'Addresses:',
-                style: TextStyle(color: AppColors.blackColor),
+                'My Account',
+                style: TextStyle(
+                  color: AppColors.blackColor,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 20),
-              ListView(
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _createNewAddressfield,
+              const SizedBox(height: 40),
+              FutureBuilder<GetUserProfile>(
+                future: _getUserProfileFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    print('Snapshot Profile : ${snapshot.data}');
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Spacer(),
+                            CircleAvatar(
+                              backgroundColor: AppColors.primaryColor,
+                              radius: 60,
+                              child: Image.network(
+                                snapshot.data!.profilePhoto,
+                              ),
+                            ),
+                            const Spacer(),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        const Text(
+                          'First name:',
+                          style: TextStyle(
+                            color: AppColors.blackColor,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: width,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primaryColor,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            snapshot.data!.firstName,
+                            style: const TextStyle(
+                              color: AppColors.blackColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Last name:',
+                          style: TextStyle(
+                            color: AppColors.blackColor,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: width,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primaryColor,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            snapshot.data!.lastName,
+                            style: const TextStyle(
+                              color: AppColors.blackColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Email:',
+                          style: TextStyle(
+                            color: AppColors.blackColor,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: width,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primaryColor,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            snapshot.data!.email,
+                            style: const TextStyle(
+                              color: AppColors.blackColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Phone Number:',
+                          style: TextStyle(
+                            color: AppColors.blackColor,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: width,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primaryColor,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            snapshot.data!.phoneNo.toString(),
+                            style: const TextStyle(
+                              color: AppColors.blackColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => UpdateProfileScreen(
+                                    first_name: snapshot.data!.firstName,
+                                    last_name: snapshot.data!.lastName,
+                                    email: snapshot.data!.email,
+                                    profile_photo: snapshot.data!.profilePhoto,
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor,
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 70,
+                                vertical: 14,
+                              ),
+                              child: Text(
+                                'Edit Profile',
+                                style: TextStyle(
+                                  color: AppColors.whiteColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        const Divider(
+                          color: AppColors.greyColor,
+                        ),
+                        const SizedBox(height: 30),
+                        const Text(
+                          'Addresses:',
+                          style: TextStyle(
+                            color: AppColors.blackColor,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        AddressDisplayWidget(snapshot: snapshot),
+                      ],
+                    );
+                  }
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
               ),
               const SizedBox(height: 30),
-              OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                ),
-                child: const Text(
-                  'Add Address',
-                  style: TextStyle(
-                    color: AppColors.whiteColor,
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AddAddresses(
+                          pageTitle: 'Add Address',
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 70,
+                      vertical: 14,
+                    ),
+                    child: Text(
+                      'Add Address',
+                      style: TextStyle(
+                        color: AppColors.whiteColor,
+                      ),
+                    ),
                   ),
                 ),
               ),
+              const SizedBox(height: 30),
             ],
           ),
         ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mahasainik_app/UI/splashscreen/splash_screen.dart';
-import 'package:mahasainik_app/bloc/login/login_bloc.dart';
 import 'package:mahasainik_app/utils/color_assets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,26 +54,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<LoginBloc>(
-          create: (BuildContext context) => LoginBloc(),
+    return MaterialApp(
+      title: 'Mahasainik',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: AppColors.primaryColor,
         ),
-      ],
-      child: MaterialApp(
-        title: 'Mahasainik',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch().copyWith(
-            primary: AppColors.primaryColor,
-          ),
-          textTheme: Theme.of(context).textTheme.apply(
-                bodyColor: AppColors.whiteColor,
-                displayColor: AppColors.whiteColor,
-              ),
-        ),
-        home: const SplashScreen(),
+        textTheme: Theme.of(context).textTheme.apply(
+              bodyColor: AppColors.whiteColor,
+              displayColor: AppColors.whiteColor,
+            ),
       ),
+      home: const SplashScreen(),
     );
   }
 }

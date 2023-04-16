@@ -70,4 +70,5 @@ class AppImages {
   static const topBrands8 = 'assets/top_brands_8.png';
   static const paytmBanner = 'assets/paytm_banner.png';
   static const couponBanner = 'assets/coupon_banner.png';
+  static const productOfferBanner = 'assets/product_offer_banner.png';
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mahasainik_app/UI/cart/cart_screen.dart';
 import 'package:mahasainik_app/UI/categories/categories_screen.dart';
 import 'package:mahasainik_app/UI/home/home_page.dart';
-import 'package:mahasainik_app/UI/wishlist/wishlist_screen.dart';
 import 'package:mahasainik_app/utils/color_assets.dart';
 
 class MainPage extends StatefulWidget {
@@ -18,7 +17,7 @@ class _MainPageState extends State<MainPage> {
   static const List<Widget> _bottomListItems = [
     HomePage(),
     CategoriesScreen(),
-    WishlistScreen(),
+    //WishlistScreen(),
     CartScreen(),
   ];
 
@@ -51,12 +50,12 @@ class _MainPageState extends State<MainPage> {
             ),
             label: 'Categories',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.favorite_outline_rounded,
-            ),
-            label: 'Wishlist',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(
+          //     Icons.favorite_outline_rounded,
+          //   ),
+          //   label: 'Wishlist',
+          // ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.shopping_cart,

@@ -16,6 +16,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
           'Wishlist',
         ),
         centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
     );
   }

@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _mobileController = TextEditingController();
   late String? mobileNumber;
-  GenerateOtpModel? generateOtpModel;
+  bool isLoading = false;
 
   Future<GenerateOtpModel> sendOTPRequest(String mobileNumber) async {
     try {
@@ -54,56 +54,67 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 300),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _mobileController,
-                        style: const TextStyle(
-                          color: AppColors.primaryColor,
-                          fontSize: 16,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: 'Enter 10-digit mobile number',
-                        ),
-                        validator: (value) {
-                          mobileNumber = value!;
-                          validateMobile(mobileNumber);
-                        },
+        child: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 300),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
                       ),
-                      const SizedBox(height: 70),
-                      ElevatedButton(
-                        onPressed: () {
-                          sendOTPRequest(_mobileController.text);
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => OTPInputScreen(
-                                mobileNumber: '+91${_mobileController.text}',
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _mobileController,
+                              style: const TextStyle(
+                                color: AppColors.primaryColor,
+                                fontSize: 16,
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'Enter 10-digit mobile number',
+                              ),
+                              validator: (value) {
+                                mobileNumber = value!;
+                                validateMobile(mobileNumber);
+                              },
+                            ),
+                            const SizedBox(height: 70),
+                            ElevatedButton(
+                              onPressed: () async {
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                sendOTPRequest(_mobileController.text);
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => OTPInputScreen(
+                                      mobileNumber:
+                                          '+91${_mobileController.text}',
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'Send OTP',
                               ),
                             ),
-                          );
-                        },
-                        child: const Text(
-                          'Send OTP',
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
       ),
     );
   }

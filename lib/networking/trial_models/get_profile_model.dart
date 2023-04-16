@@ -14,12 +14,12 @@ class GetUserProfile {
     required this.profilePhoto,
   });
 
-  String firstName;
-  String lastName;
-  String email;
-  int phoneNo;
-  List<Address> address;
-  String profilePhoto;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final int phoneNo;
+  final List<Address> address;
+  final String profilePhoto;
 
   factory GetUserProfile.fromRawJson(String str) =>
       GetUserProfile.fromJson(json.decode(str));
@@ -69,31 +69,31 @@ class Address {
     required this.numOrdersAsBillingAddress,
     required this.hash,
     required this.dateCreated,
-    required this.placeName,
+    this.placeName,
   });
 
-  int id;
-  String title;
-  String firstName;
-  String lastName;
-  String line1;
-  String line2;
-  String line3;
-  String line4;
-  String state;
-  String postcode;
-  String countryId;
-  String searchText;
-  String phoneNumber;
-  String notes;
-  int userId;
-  bool isDefaultForShipping;
-  bool isDefaultForBilling;
-  int numOrdersAsShippingAddress;
-  int numOrdersAsBillingAddress;
-  String hash;
-  DateTime dateCreated;
-  String placeName;
+  final int id;
+  final String title;
+  final String firstName;
+  final String lastName;
+  final String line1;
+  final String line2;
+  final String line3;
+  final String line4;
+  final String state;
+  final String postcode;
+  final String countryId;
+  final String searchText;
+  final String phoneNumber;
+  final String notes;
+  final int userId;
+  final bool isDefaultForShipping;
+  final bool isDefaultForBilling;
+  final int numOrdersAsShippingAddress;
+  final int numOrdersAsBillingAddress;
+  final String hash;
+  final DateTime dateCreated;
+  final String? placeName;
 
   factory Address.fromRawJson(String str) => Address.fromJson(json.decode(str));
 
