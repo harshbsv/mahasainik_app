@@ -71,4 +71,5 @@ class AppImages {
   static const paytmBanner = 'assets/paytm_banner.png';
   static const couponBanner = 'assets/coupon_banner.png';
   static const productOfferBanner = 'assets/product_offer_banner.png';
+  static const loginAsset = 'assets/login_asset.png';
 }

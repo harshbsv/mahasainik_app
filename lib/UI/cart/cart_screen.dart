@@ -6,6 +6,7 @@ import 'package:mahasainik_app/UI/checkout/checkout_screen.dart';
 import 'package:mahasainik_app/networking/api_endpoints.dart';
 import 'package:mahasainik_app/networking/trial_models/basket_model.dart';
 import 'package:mahasainik_app/networking/trial_models/checkout_model.dart';
+import 'package:mahasainik_app/networking/trial_models/get_profile_model.dart';
 import 'package:mahasainik_app/utils/color_assets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,11 +47,46 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
+  Future<GetUserProfile> getUserProfile() async {
+    try {
+      final tokenPref = await SharedPreferences.getInstance();
+      String? token = tokenPref.getString('token');
+      print('tokenpref: $token');
+      final response =
+          await http.get(Uri.parse(ApiEndpoints.getProfile), headers: {
+        'Authorization': 'Token $token',
+      });
+      print('response : ${response.body.toString()}');
+      if (response.statusCode == 200) {
+        final userProfile = GetUserProfile.fromJson(jsonDecode(response.body));
+        print('userprofile email: ${userProfile.email}');
+        tokenPref.setString('user_email', userProfile.email);
+        tokenPref.setString('first_name', userProfile.firstName);
+        tokenPref.setString('last_name', userProfile.lastName);
+        tokenPref.setString('line1', userProfile.address[0].line1);
+        tokenPref.setString('line2', userProfile.address[0].line2);
+        tokenPref.setString('line3', userProfile.address[0].line3);
+        tokenPref.setString('line4', userProfile.address[0].line4);
+        tokenPref.setString('notes', userProfile.address[0].notes);
+        tokenPref.setString('phone_number', userProfile.address[0].phoneNumber);
+        tokenPref.setString('postcode', userProfile.address[0].postcode);
+        tokenPref.setString('state', userProfile.address[0].state);
+        tokenPref.setString('title', userProfile.address[0].title);
+        return userProfile;
+      } else {
+        throw 'status code other than 200';
+      }
+    } catch (e) {
+      throw 'Exception fetching user profile.';
+    }
+  }
+
   Future<CheckoutModel> checkout(
     int basketId,
     String total,
   ) async {
     try {
+      getUserProfile();
       final tokenPref = await SharedPreferences.getInstance();
       String? token = tokenPref.getString('token');
       String? user_email = tokenPref.getString('user_email');
@@ -128,6 +164,7 @@ class _CartScreenState extends State<CartScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    getUserProfile();
   }
 
   @override
@@ -214,7 +251,7 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                             ),
                             const Spacer(),
-                            InkWell(
+                            GestureDetector(
                               onTap: () {
                                 checkout(
                                   snapshot.data![0].id,

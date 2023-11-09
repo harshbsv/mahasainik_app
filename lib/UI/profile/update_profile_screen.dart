@@ -58,8 +58,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       String? token = tokenPref.getString('token');
       print('tokenpref: $token');
 
-      var request = await http.MultipartRequest(
-          'PUT', Uri.parse(ApiEndpoints.updateProfile));
+      var request =
+          http.MultipartRequest('PUT', Uri.parse(ApiEndpoints.updateProfile));
 
       request.headers['Authorization'] = 'Token $token';
       request.fields['first_name'] = firstName;
@@ -97,7 +97,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _picker = ImagePicker();
     _firstNameController.text = widget.first_name!;

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:mahasainik_app/UI/profile/add_address.dart';
+import 'package:mahasainik_app/networking/response_models/user_profile_response_model.dart';
 import 'package:mahasainik_app/utils/color_assets.dart';
 
 class AddressDisplayWidget extends StatefulWidget {
   const AddressDisplayWidget({
     Key? key,
-    required this.snapshot,
+    required this.responseModel,
   }) : super(key: key);
 
-  final AsyncSnapshot snapshot;
+  final UserProfileResponseModel responseModel;
 
   @override
   State<AddressDisplayWidget> createState() => _AddressDisplayWidgetState();
@@ -20,7 +21,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: widget.snapshot.data!.address.length,
+      itemCount: widget.responseModel.address.length,
       itemBuilder: (context, index) {
         return Container(
           padding: const EdgeInsets.all(12),
@@ -46,7 +47,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    widget.snapshot.data!.address[index].placeName ?? "",
+                    widget.responseModel.address[index].place_name ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -66,7 +67,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    widget.snapshot.data!.address[index].title ?? "",
+                    widget.responseModel.address[index].title ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -74,7 +75,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].firstName ?? "",
+                    widget.responseModel.address[index].first_name ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -82,7 +83,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].lastName ?? "",
+                    widget.responseModel.address[index].last_name ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -102,7 +103,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].line1 ?? "",
+                    widget.responseModel.address[index].line1 ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -122,7 +123,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].line2 ?? "",
+                    widget.responseModel.address[index].line2 ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -142,7 +143,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].line3 ?? "",
+                    widget.responseModel.address[index].line3 ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -162,7 +163,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].line4 ?? "",
+                    widget.responseModel.address[index].line4 ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -182,7 +183,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].state ?? "",
+                    widget.responseModel.address[index].state ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -202,7 +203,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].postcode ?? "",
+                    widget.responseModel.address[index].postcode ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -222,7 +223,7 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.snapshot.data!.address[index].phoneNumber ?? "",
+                    widget.responseModel.address[index].phone_number ?? "",
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontSize: 16,
@@ -239,24 +240,24 @@ class _AddressDisplayWidgetState extends State<AddressDisplayWidget> {
                         MaterialPageRoute(
                           builder: (context) => AddAddresses(
                             pageTitle: 'Edit Address',
-                            id: widget.snapshot.data!.address[index].id,
+                            id: widget.responseModel.address[index].id,
                             placeName:
-                                widget.snapshot.data!.address[index].placeName,
-                            title: widget.snapshot.data!.address[index].title,
+                                widget.responseModel.address[index].place_name,
+                            title: widget.responseModel.address[index].title,
                             firstName:
-                                widget.snapshot.data!.address[index].firstName,
+                                widget.responseModel.address[index].first_name,
                             lastName:
-                                widget.snapshot.data!.address[index].lastName,
-                            line1: widget.snapshot.data!.address[index].line1,
-                            line2: widget.snapshot.data!.address[index].line2,
-                            line3: widget.snapshot.data!.address[index].line3,
-                            line4: widget.snapshot.data!.address[index].line4,
-                            state: widget.snapshot.data!.address[index].state,
+                                widget.responseModel.address[index].last_name,
+                            line1: widget.responseModel.address[index].line1,
+                            line2: widget.responseModel.address[index].line2,
+                            line3: widget.responseModel.address[index].line3,
+                            line4: widget.responseModel.address[index].line4,
+                            state: widget.responseModel.address[index].state,
                             postcode:
-                                widget.snapshot.data!.address[index].postcode,
+                                widget.responseModel.address[index].postcode,
                             phoneNumber: widget
-                                .snapshot.data!.address[index].phoneNumber,
-                            notes: widget.snapshot.data!.address[index].notes,
+                                .responseModel.address[index].phone_number,
+                            notes: widget.responseModel.address[index].notes,
                           ),
                         ),
                       );

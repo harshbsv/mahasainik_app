@@ -158,10 +158,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       const SizedBox(height: 20),
                       Image.asset(AppImages.productOfferBanner),
                       const SizedBox(height: 20),
-                      SizedBox(
+                      const SizedBox(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               'Product Description',
                               style: TextStyle(
@@ -181,10 +181,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      SizedBox(
+                      const SizedBox(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               'MANUFACTURING DETAILS',
                               style: TextStyle(
@@ -203,10 +203,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      SizedBox(
+                      const SizedBox(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               'SELLER INFORMATION',
                               style: TextStyle(
@@ -247,10 +247,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      SizedBox(
+                      const SizedBox(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               'FOR ANY ASSISTANCE CONTACT',
                               style: TextStyle(
@@ -286,10 +286,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 const SizedBox(height: 20),
                 Image.asset(AppImages.paytmBanner),
                 const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20),
+                const Padding(
+                  padding: EdgeInsets.only(left: 20),
                   child: Row(
-                    children: const [
+                    children: [
                       Text(
                         'Frequently Bought Together',
                         style: TextStyle(

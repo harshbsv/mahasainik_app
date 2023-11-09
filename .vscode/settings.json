@@ -1,0 +1,9 @@
+{
+    "explorerExclude.backup": {
+        
+    },
+    "explorerExclude.showPicker": true,
+    "files.exclude": {
+        "**/*.g.dart": true
+    }
+}

@@ -1,3 +1,5 @@
+String kAppName = 'Mahasainik';
+
 extension StringX on String {
   bool containsIgnoreCase(String stringToMatch) {
     return toLowerCase().contains(stringToMatch.toLowerCase());
